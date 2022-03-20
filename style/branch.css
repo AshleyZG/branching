@@ -1,0 +1,5 @@
+.in-wrapper-cell {
+    background: aqua !important;
+    display: inline-block;
+    width: 100%;
+}
