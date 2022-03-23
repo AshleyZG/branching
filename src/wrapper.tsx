@@ -60,6 +60,14 @@ class WrapperWidget extends React.Component<WrapperProps, WrapperState>{
             {this.props.wrapper.id}
             <div>Display: {this.props.wrapper.displayLength}</div>
             <div>Hidden: {this.props.wrapper.hiddenLength}</div>
+            {this.props.wrapper.cellList.map((cell: Cell) => {
+                if (cell.isHidden){
+                    return <div>{cell.model.id}</div>
+                }
+                else{
+                    return <div></div>
+                }
+            })}
         </div>
     }
 }
