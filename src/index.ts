@@ -183,9 +183,7 @@ export class BranchButtonExtension
         this.sideViewWidget?.model.pushCellToWrapper(newCell, wrapperID);
 
         // update metadata
-        console.log('not implemented');
-        // need more check on details here
-        var newWidth: string = (100/wrapper.length).toString()+'%';
+        var newWidth: string = (100/wrapper.displayLength).toString()+'%';
         newCell.model.metadata.set('inWrapper', true);
         newCell.model.metadata.set('wrapperID', wrapper.id);
         console.log(newCell.model.sharedModel.getMetadata());
@@ -200,17 +198,21 @@ export class BranchButtonExtension
      * @param panel 
      */
     hide(panel: NotebookPanel){
-        console.log("Not Implemented");
         var activeCell = panel.content.activeCell;
 
         // get wrapper
         var wrapperID = activeCell?.model.sharedModel.getMetadata().wrapperID;
-        
+        var wrapper = this.sideViewWidget!.model.wrappers[wrapperID];
+
         // hide cell in wrapper
         this.sideViewWidget?.model.hideCellInWrapper(activeCell!, wrapperID);
 
         // resize cells in the  wrapper
-        console.log('not implemented ');
+        var newWidth: string = (100/wrapper.displayLength).toString()+'%';
+        wrapper.cellList.forEach((cell: Cell) => {
+            cell.model.metadata.set('width', newWidth);
+        })
+
     }
 }
 
@@ -219,8 +221,8 @@ export class BranchButtonExtension
  *
  * @param app Main application object
  */
- function activate(app: JupyterFrontEnd): void {
-  app.docRegistry.addWidgetExtension('Notebook', new BranchButtonExtension());
+function activate(app: JupyterFrontEnd): void {
+    app.docRegistry.addWidgetExtension('Notebook', new BranchButtonExtension());
 }
 
 
