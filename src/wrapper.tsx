@@ -16,8 +16,31 @@ class Wrapper {
     updateCellOrder(){}
     removeCell(){}
 
-    get length(){
+    hideCell(cell: Cell){
+        console.log('not implemented');
+        cell.hide();
+        console.log(cell.isHidden);
+        console.log(this.cellList.map((cell: Cell) => {return cell.isHidden}));
+    }
+
+    get length(): number{
         return this.cellList.length;
+    }
+
+    get displayLength(): number{
+        var isDisplayed: number[] = this.cellList.map((cell: Cell) => {
+            return cell.isHidden? 0 : 1;
+        });
+        var displayLength = isDisplayed.reduce((a,b) => a+b, 0);
+        return displayLength;
+    }
+
+    get hiddenLength(): number{
+        var isHidden: number[] = this.cellList.map((cell: Cell) => {
+            return cell.isHidden? 1 : 0;
+        });
+        var hiddenLength = isHidden.reduce((a,b) => a+b, 0);
+        return hiddenLength;
     }
 }
 
@@ -25,15 +48,18 @@ class Wrapper {
 interface WrapperProps{
     wrapper: Wrapper;
 };
-interface WrapperState{};
+interface WrapperState{
+};
 class WrapperWidget extends React.Component<WrapperProps, WrapperState>{
     constructor(props:any){
         super(props);
-        
+
     }
     render(): React.ReactNode {
         return <div className='wrapper'>
             {this.props.wrapper.id}
+            <div>Display: {this.props.wrapper.displayLength}</div>
+            <div>Hidden: {this.props.wrapper.hiddenLength}</div>
         </div>
     }
 }
@@ -51,8 +77,16 @@ class SideViewModel extends VDomModel {
         return wrapper;
     }
 
-    pushCellToWrapper(){
+    pushCellToWrapper(cell: Cell, wrapperID: number): void{
+        var wrapper = this.wrappers[wrapperID];
+        wrapper.cellList.push(cell);
+        this.stateChanged.emit();
+    }
 
+    hideCellInWrapper(cell: Cell, wrapperID: number): void{
+        var wrapper = this.wrappers[wrapperID];
+        wrapper.hideCell(cell);
+        this.stateChanged.emit();
     }
 
 }
@@ -60,14 +94,12 @@ class SideViewModel extends VDomModel {
 
 class SideViewWidget extends VDomRenderer<SideViewModel> {
 
-    sideViewRef: React.RefObject<HTMLElement>;
 
     constructor(model: SideViewModel) {
         super(model);
         this.addClass('jp-ReactWidget');
         this.addClass('sideview');
 
-        this.sideViewRef =  React.createRef();
     }
 
 

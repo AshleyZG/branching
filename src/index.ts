@@ -180,9 +180,11 @@ export class BranchButtonExtension
         var wrapper = this.sideViewWidget!.model.wrappers[wrapperID];
 
         // insert new cell to wrapper
-        wrapper.insertCell(newCell);
+        this.sideViewWidget?.model.pushCellToWrapper(newCell, wrapperID);
 
         // update metadata
+        console.log('not implemented');
+        // need more check on details here
         var newWidth: string = (100/wrapper.length).toString()+'%';
         newCell.model.metadata.set('inWrapper', true);
         newCell.model.metadata.set('wrapperID', wrapper.id);
@@ -200,16 +202,15 @@ export class BranchButtonExtension
     hide(panel: NotebookPanel){
         console.log("Not Implemented");
         var activeCell = panel.content.activeCell;
-        // var activeCellID = activeCell?.model.id;
 
         // get wrapper
         var wrapperID = activeCell?.model.sharedModel.getMetadata().wrapperID;
-        var wrapper = this.sideViewWidget!.model.wrappers[wrapperID];
+        
+        // hide cell in wrapper
+        this.sideViewWidget?.model.hideCellInWrapper(activeCell!, wrapperID);
 
-        console.log(wrapper);
-        // wrapper.
-        debugger;
-
+        // resize cells in the  wrapper
+        console.log('not implemented ');
     }
 }
 
