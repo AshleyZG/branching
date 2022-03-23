@@ -3,3 +3,20 @@
     display: inline-block;
     width: 100%;
 }
+
+.sideview {
+    width: 20% !important;
+    height: 100% !important;
+    top: 29px !important;
+    left: 80% !important;
+    background-color: bisque;
+}
+
+.wrapper {
+    background-color: cadetblue;
+    margin: 5px;
+}
+
+.my-notebook-content-panel {
+    width: 80% !important;
+}
