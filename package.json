@@ -53,7 +53,8 @@
     "watch:labextension": "jupyter labextension watch ."
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.1.0"
+    "@jupyterlab/application": "^3.1.0",
+    "@jupyterlab/notebook": "^3.2.9"
   },
   "devDependencies": {
     "@jupyterlab/builder": "^3.1.0",
@@ -80,7 +81,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "jupyterlab": { 
+  "jupyterlab": {
     "extension": true,
     "outputDir": "branching/labextension"
   },
