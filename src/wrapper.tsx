@@ -97,12 +97,14 @@ class SideViewModel extends VDomModel {
     pushCellToWrapper(cell: Cell, wrapperID: number): void{
         var wrapper = this.wrappers[wrapperID];
         wrapper.cellList.push(cell);
+        wrapper.updateCellWidth();
         this.stateChanged.emit();
     }
 
     hideCellInWrapper(cell: Cell, wrapperID: number): void{
         var wrapper = this.wrappers[wrapperID];
         wrapper.hideCell(cell);
+        wrapper.updateCellWidth();
         this.stateChanged.emit();
     }
 

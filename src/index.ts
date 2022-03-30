@@ -12,7 +12,7 @@ import { ToolbarButton } from '@jupyterlab/apputils';
 import { PanelLayout } from '@lumino/widgets';
 
 import { CodeCell } from '@jupyterlab/cells';
-import {Cell} from '@jupyterlab/cells';
+// import {Cell} from '@jupyterlab/cells';
 
 import {
   // ISharedCell,
@@ -193,13 +193,8 @@ export class BranchButtonExtension
         this.sideViewWidget?.model.pushCellToWrapper(newCell, wrapperID);
 
         // update metadata
-        var newWidth: string = (100/wrapper.displayLength).toString()+'%';
         newCell.model.metadata.set('inWrapper', true);
         newCell.model.metadata.set('wrapperID', wrapper.id);
-        console.log(newCell.model.sharedModel.getMetadata());
-        wrapper.cellList.forEach((cell: Cell) => {
-            cell.model.metadata.set('width', newWidth);
-        })
 
     }
 
@@ -212,16 +207,9 @@ export class BranchButtonExtension
 
         // get wrapper
         var wrapperID = activeCell?.model.sharedModel.getMetadata().wrapperID;
-        var wrapper = this.sideViewWidget!.model.wrappers[wrapperID];
 
         // hide cell in wrapper
         this.sideViewWidget?.model.hideCellInWrapper(activeCell!, wrapperID);
-
-        // resize cells in the  wrapper
-        var newWidth: string = (100/wrapper.displayLength).toString()+'%';
-        wrapper.cellList.forEach((cell: Cell) => {
-            cell.model.metadata.set('width', newWidth);
-        })
 
     }
 
