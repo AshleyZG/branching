@@ -95,6 +95,9 @@ export class BranchButtonExtension
         (panel.layout as PanelLayout).widgets[2].addClass('my-notebook-content-panel');
         this.sideViewWidget = sideView;
 
+
+
+
         const callback = () => {
             this.createWrapper(panel);
         };
@@ -103,6 +106,9 @@ export class BranchButtonExtension
         }
         const hideCallback = () => {
             this.hide(panel);
+        }
+        const branchModeCallback = () => {
+          this.turnOnBranchMode(panel);
         }
 
         const button = new ToolbarButton({
@@ -126,14 +132,23 @@ export class BranchButtonExtension
             tooltip: 'Hide A Branch',
         })
 
+        const BranchModeButton = new ToolbarButton({
+          className: 'branch-mode',
+          label: 'Branch Mode',
+          onClick: branchModeCallback,
+          tooltip: 'Turn On Branch Mode',
+        })
+
 
         panel.toolbar.insertItem(10, 'clearOutputs', button);
         panel.toolbar.insertItem(11, 'fork', forkButton);
         panel.toolbar.insertItem(12, 'hide', hideButton);
+        panel.toolbar.insertItem(13, 'branchMdoe', BranchModeButton);
         return new DisposableDelegate(() => {
             button.dispose();
             forkButton.dispose();
             hideButton.dispose();
+            BranchModeButton.dispose();
         });
     }
 
@@ -148,13 +163,8 @@ export class BranchButtonExtension
         activeCell?.model.metadata.changed.connect(newOnMetadataChanged(panel.content.widgets[activeCellIndex] as CodeCell));
 
         // create a wrapper model
-        // var wrapper = new Wrapper(this.wrapperList.length);
-        // var wrapper = new Wrapper(this.sideViewWidget!.model.wrappers.length);
-        // this.wrapperList.push(wrapper);
         var wrapper: Wrapper = this.sideViewWidget!.model.createWrapper();
-        wrapper.insertCell(activeCell!);
-        
-        // this.sideViewWidget?.addWrapper(wrapper);
+        wrapper.insertCell(activeCell!);        
 
         // add inWrapper attribute to metadata
         activeCell!.model.metadata.set('inWrapper', true);
@@ -213,6 +223,11 @@ export class BranchButtonExtension
             cell.model.metadata.set('width', newWidth);
         })
 
+    }
+
+    turnOnBranchMode(panel: NotebookPanel){
+      var script = 'from types import SimpleNamespace';
+      panel.context.sessionContext.session?.kernel?.requestExecute({code: script}, true);
     }
 }
 
