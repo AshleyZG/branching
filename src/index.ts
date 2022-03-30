@@ -226,7 +226,11 @@ export class BranchButtonExtension
     }
 
     turnOnBranchMode(panel: NotebookPanel){
-      var script = 'from types import SimpleNamespace';
+      var script = `
+      from types import SimpleNamespace
+      namespaceList = []
+      `;
+      //  '';
       panel.context.sessionContext.session?.kernel?.requestExecute({code: script}, true);
     }
 }
