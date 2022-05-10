@@ -1,11 +1,11 @@
 import {
-  JupyterFrontEnd,
-  JupyterFrontEndPlugin
+	JupyterFrontEnd,
+	JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import {
-  NotebookPanel,
-  INotebookModel,
+	NotebookPanel,
+	INotebookModel,
 } from '@jupyterlab/notebook';
 import { IDisposable, DisposableDelegate } from '@lumino/disposable';
 import { ToolbarButton } from '@jupyterlab/apputils';
@@ -15,80 +15,80 @@ import { CodeCell, Cell } from '@jupyterlab/cells';
 import { ISessionContext } from '@jupyterlab/apputils';
 import { Kernel, KernelMessage } from '@jupyterlab/services';
 import {
-  OutputArea,
+	OutputArea,
 } from '@jupyterlab/outputarea';
 import { MyOutputArea } from './outputarea';
 import {
-  YCodeCell
+  	YCodeCell
 } from '@jupyterlab/shared-models';
 
 import {
-  JSONObject,
+  	JSONObject,
 } from '@lumino/coreutils';
 
 import { IObservableJSON, IObservableMap } from '@jupyterlab/observables';
 import {
     ReadonlyPartialJSONValue
-  } from '@lumino/coreutils';
+} from '@lumino/coreutils';
 
 import { Wrapper, SideViewWidget, SideViewModel } from './wrapper';
 import { ICommandPalette } from '@jupyterlab/apputils';
 import { NotebookActions } from '@jupyterlab/notebook';
 
 import {
-  standardRendererFactories as initialFactories,
-  RenderMimeRegistry
+	standardRendererFactories as initialFactories,
+	RenderMimeRegistry
 } from '@jupyterlab/rendermime';
 
 const CELL_OUTPUT_AREA_CLASS = 'jp-Cell-outputArea';
 
 function newOnMetadataChanged (cell: CodeCell){
-  function fn (
-    model: IObservableJSON,
-    args: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue | undefined>
-   ): void{
-    switch (args.key) {
-      case 'jupyter':
-        if (cell.syncCollapse) {
-          cell.loadCollapseState();
-        }
-        break;
-      case 'editable':
-        if (cell.syncEditable) {
-          cell.loadEditableState();
-        }
-        break;
+	function fn (
+		model: IObservableJSON,
+		args: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue | undefined>
+	): void{
+		switch (args.key) {
+		case 'jupyter':
+			if (cell.syncCollapse) {
+			cell.loadCollapseState();
+			}
+			break;
+		case 'editable':
+			if (cell.syncEditable) {
+			cell.loadEditableState();
+			}
+			break;
 
-      case 'inWrapper':
-        cell.addClass('in-wrapper-cell');
-        break;
-      case 'width':
-        cell.node.style.width = args.newValue as string;
-        break;
-      case 'branchList':
-        const rendermime = new RenderMimeRegistry({ initialFactories });
-        while(((cell.layout as PanelLayout).widgets[3] as Panel).widgets.length>1){
-          (((cell.layout as PanelLayout).widgets[3] as Panel).layout as PanelLayout)?.removeWidgetAt(1);
-        }
-        console.log((args.newValue as string[]).length, args.newValue as string[]);
-        (args.newValue as string[]).forEach((value:string) => {
-          const output = ( new MyOutputArea({
-            model: cell.model.outputs,
-            rendermime: rendermime,
-            contentFactory: cell.contentFactory,
-          }));
-          output.addClass(CELL_OUTPUT_AREA_CLASS);
-          console.log(cell.model.id);
-          ((cell.layout as PanelLayout).widgets[3] as Panel).addWidget(output);
+		case 'inWrapper':
+			cell.addClass('in-wrapper-cell');
+			break;
+		case 'width':
+			cell.node.style.width = args.newValue as string;
+			break;
+		case 'branchList':
+			const rendermime = new RenderMimeRegistry({ initialFactories });
+			while(((cell.layout as PanelLayout).widgets[3] as Panel).widgets.length>1){
+			(((cell.layout as PanelLayout).widgets[3] as Panel).layout as PanelLayout)?.removeWidgetAt(1);
+			}
+			console.log((args.newValue as string[]).length, args.newValue as string[]);
+			(args.newValue as string[]).forEach((value:string) => {
+			const output = ( new MyOutputArea({
+				model: cell.model.outputs,
+				rendermime: rendermime,
+				contentFactory: cell.contentFactory,
+			}));
+			output.addClass(CELL_OUTPUT_AREA_CLASS);
+			console.log(cell.model.id);
+			((cell.layout as PanelLayout).widgets[3] as Panel).addWidget(output);
 
-        })
-        break;
-      default:
-        break;
-    }
+			})
+			break;
+		default:
+			break;
+		}
 
-  }
-  return fn
+	}
+	return fn
 }
 
 
@@ -96,9 +96,9 @@ function newOnMetadataChanged (cell: CodeCell){
  * The plugin registration information.
  */
  const plugin: JupyterFrontEndPlugin<void> = {
-  activate: activate,
-  id: 'toolbar-button',
-  autoStart: true,
+	activate: activate,
+	id: 'toolbar-button',
+	autoStart: true,
 };
 
 /**
@@ -153,6 +153,10 @@ export class BranchButtonExtension
           this.myRun(panel);
         }
 
+        const lockCallback = () => {
+          this.lock(panel);
+        }
+
         const button = new ToolbarButton({
             className: 'create-wrapper-button',
             label: 'Create Wrapper',
@@ -187,6 +191,13 @@ export class BranchButtonExtension
           onClick: myRunCallback,
           tooltip: 'My Run Cell',
         })
+
+        const lockButton = new ToolbarButton({
+          className: 'lock-button',
+          label: "Lock",
+          onClick: lockCallback,
+          tooltip: 'Lock Notebook',
+        })
         
 
 
@@ -195,12 +206,14 @@ export class BranchButtonExtension
         panel.toolbar.insertItem(12, 'hide', hideButton);
         panel.toolbar.insertItem(13, 'branchMdoe', BranchModeButton);
         panel.toolbar.insertItem(14, 'myRun', myRunButton);
+        panel.toolbar.insertItem(15, 'lock', lockButton);
         return new DisposableDelegate(() => {
             button.dispose();
             forkButton.dispose();
             hideButton.dispose();
             BranchModeButton.dispose();
             myRunButton.dispose();
+            lockButton.dispose();
         });
     }
 
@@ -317,144 +330,148 @@ export class BranchButtonExtension
     }
 
     processCode(cell: CodeCell, namespaceID: string): string{
-      console.log('not implemented');
-      const currentOutputIndex = cell.model.metadata.get('currentOutputIndex') as number;
-      const prevBranch = (cell.model.metadata.get('prevBranchList') as string[])[currentOutputIndex];
-      const currentBranch = (cell.model.metadata.get('branchList') as string[])[currentOutputIndex]; 
-      // before executing the real code, insert code to set namespace with namespaceID
-      var startScript = `%%copy_space ${prevBranch} ${currentBranch}`;
-      // return cell.model.value.text;
-      return `${startScript}\n${cell.model.value.text}`;
+		console.log('not implemented');
+		const currentOutputIndex = cell.model.metadata.get('currentOutputIndex') as number;
+		const prevBranch = (cell.model.metadata.get('prevBranchList') as string[])[currentOutputIndex];
+		const currentBranch = (cell.model.metadata.get('branchList') as string[])[currentOutputIndex]; 
+		// before executing the real code, insert code to set namespace with namespaceID
+		var startScript = `%%copy_space ${prevBranch} ${currentBranch}`;
+		// return cell.model.value.text;
+		return `${startScript}\n${cell.model.value.text}`;
     }
 
     executeUnderNamespace(){
-      var scope = this;
+		var scope = this;
 
-      async function execute(
-        cell: CodeCell,
-        sessionContext: ISessionContext,
-        metadata?: JSONObject    
-      ): Promise<KernelMessage.IExecuteReplyMsg | void> {
-        const model = cell.model;
-        console.log(scope.sideViewWidget);
-        // original method: take cell value as script for execution
-        // const code = model.value.text;
-        // new method: run cell value in a new namespace
-        const code = scope.processCode(cell, 'a');
-        console.log(code);
-        if (!code.trim() || !sessionContext.session?.kernel) {
-          model.clearExecution();
-          return;
-        }
-        const cellId = { cellId: model.id };
-        metadata = {
-          ...model.metadata.toJSON(),
-          ...metadata,
-          ...cellId
-        };
-        const { recordTiming } = metadata;
-        model.clearExecution();
-        cell.outputHidden = false;
-        cell.setPrompt('*');
-        model.trusted = true;
-        let future:
-          | Kernel.IFuture<
-              KernelMessage.IExecuteRequestMsg,
-              KernelMessage.IExecuteReplyMsg
-            >
-          | undefined;
-        try {
-          const msgPromise = OutputArea.execute(
-            code,
-            cell.outputArea,
-            sessionContext,
-            metadata
-          );
-          // cell.outputArea.future assigned synchronously in `execute`
-          if (recordTiming) {
-            const recordTimingHook = (msg: KernelMessage.IIOPubMessage) => {
-              let label: string;
-              switch (msg.header.msg_type) {
-                case 'status':
-                  label = `status.${
-                    (msg as KernelMessage.IStatusMsg).content.execution_state
-                  }`;
-                  break;
-                case 'execute_input':
-                  label = 'execute_input';
-                  break;
-                default:
-                  return true;
-              }
-              // If the data is missing, estimate it to now
-              // Date was added in 5.1: https://jupyter-client.readthedocs.io/en/stable/messaging.html#message-header
-              const value = msg.header.date || new Date().toISOString();
-              const timingInfo: any = Object.assign(
-                {},
-                model.metadata.get('execution')
-              );
-              timingInfo[`iopub.${label}`] = value;
-              model.metadata.set('execution', timingInfo);
-              return true;
-            };
-            cell.outputArea.future.registerMessageHook(recordTimingHook);
-          } else {
-            model.metadata.delete('execution');
-          }
-          // Save this execution's future so we can compare in the catch below.
-          future = cell.outputArea.future;
-          const msg = (await msgPromise)!;
-          model.executionCount = msg.content.execution_count;
-          if (recordTiming) {
-            const timingInfo = Object.assign(
-              {},
-              model.metadata.get('execution') as any
-            );
-            const started = msg.metadata.started as string;
-            // Started is not in the API, but metadata IPyKernel sends
-            if (started) {
-              timingInfo['shell.execute_reply.started'] = started;
-            }
-            // Per above, the 5.0 spec does not assume date, so we estimate is required
-            const finished = msg.header.date as string;
-            timingInfo['shell.execute_reply'] =
-              finished || new Date().toISOString();
-            model.metadata.set('execution', timingInfo);
-          }
-          return msg;
-        } catch (e) {
-          // If we started executing, and the cell is still indicating this
-          // execution, clear the prompt.
-          if (future && !cell.isDisposed && cell.outputArea.future === future) {
-            cell.setPrompt('');
-          }
-          throw e;
-        }
-      
-      }
-      return execute;
+		async function execute(
+			cell: CodeCell,
+			sessionContext: ISessionContext,
+			metadata?: JSONObject    
+		): Promise<KernelMessage.IExecuteReplyMsg | void> {
+			const model = cell.model;
+			console.log(scope.sideViewWidget);
+			// original method: take cell value as script for execution
+			// const code = model.value.text;
+			// new method: run cell value in a new namespace
+			const code = scope.processCode(cell, 'a');
+			console.log(code);
+			if (!code.trim() || !sessionContext.session?.kernel) {
+			model.clearExecution();
+			return;
+			}
+			const cellId = { cellId: model.id };
+			metadata = {
+			...model.metadata.toJSON(),
+			...metadata,
+			...cellId
+			};
+			const { recordTiming } = metadata;
+			model.clearExecution();
+			cell.outputHidden = false;
+			cell.setPrompt('*');
+			model.trusted = true;
+			let future:
+			| Kernel.IFuture<
+				KernelMessage.IExecuteRequestMsg,
+				KernelMessage.IExecuteReplyMsg
+				>
+			| undefined;
+			try {
+			const msgPromise = OutputArea.execute(
+				code,
+				cell.outputArea,
+				sessionContext,
+				metadata
+			);
+			// cell.outputArea.future assigned synchronously in `execute`
+			if (recordTiming) {
+				const recordTimingHook = (msg: KernelMessage.IIOPubMessage) => {
+				let label: string;
+				switch (msg.header.msg_type) {
+					case 'status':
+					label = `status.${
+						(msg as KernelMessage.IStatusMsg).content.execution_state
+					}`;
+					break;
+					case 'execute_input':
+					label = 'execute_input';
+					break;
+					default:
+					return true;
+				}
+				// If the data is missing, estimate it to now
+				// Date was added in 5.1: https://jupyter-client.readthedocs.io/en/stable/messaging.html#message-header
+				const value = msg.header.date || new Date().toISOString();
+				const timingInfo: any = Object.assign(
+					{},
+					model.metadata.get('execution')
+				);
+				timingInfo[`iopub.${label}`] = value;
+				model.metadata.set('execution', timingInfo);
+				return true;
+				};
+				cell.outputArea.future.registerMessageHook(recordTimingHook);
+			} else {
+				model.metadata.delete('execution');
+			}
+			// Save this execution's future so we can compare in the catch below.
+			future = cell.outputArea.future;
+			const msg = (await msgPromise)!;
+			model.executionCount = msg.content.execution_count;
+			if (recordTiming) {
+				const timingInfo = Object.assign(
+				{},
+				model.metadata.get('execution') as any
+				);
+				const started = msg.metadata.started as string;
+				// Started is not in the API, but metadata IPyKernel sends
+				if (started) {
+				timingInfo['shell.execute_reply.started'] = started;
+				}
+				// Per above, the 5.0 spec does not assume date, so we estimate is required
+				const finished = msg.header.date as string;
+				timingInfo['shell.execute_reply'] =
+				finished || new Date().toISOString();
+				model.metadata.set('execution', timingInfo);
+			}
+			return msg;
+			} catch (e) {
+			// If we started executing, and the cell is still indicating this
+			// execution, clear the prompt.
+			if (future && !cell.isDisposed && cell.outputArea.future === future) {
+				cell.setPrompt('');
+			}
+			throw e;
+			}
+		
+		}
+		return execute;
     }
 
 
     async myRun(panel: NotebookPanel){
-      var activeCell = panel.content.activeCell;
-      
-      // get branch number and id
-      // go to the last wrapper/cell and get all branch name
+		var activeCell = panel.content.activeCell;
+		
+		// get branch number and id
+		// go to the last wrapper/cell and get all branch name
 
-      // check output and branch mapping
-      for (var [i, o] of ((activeCell?.layout as PanelLayout).widgets[3] as Panel).widgets.entries()){
-        if (o.hasClass('jp-OutputCollapser')) continue;
+		// check output and branch mapping
+		for (var [i, o] of ((activeCell?.layout as PanelLayout).widgets[3] as Panel).widgets.entries()){
+			if (o.hasClass('jp-OutputCollapser')) continue;
 
-        (o as MyOutputArea).bindModel();
-        activeCell?.model.metadata.set('currentOutputIndex', i-1);
-        await NotebookActions.run(panel.content, panel.sessionContext);
-        (o as MyOutputArea).deBindModel();
+			(o as MyOutputArea).bindModel();
+			activeCell?.model.metadata.set('currentOutputIndex', i-1);
+			await NotebookActions.run(panel.content, panel.sessionContext);
+			(o as MyOutputArea).deBindModel();
 
-      }
+		}
 
 
-      return;
+		return;
+    }
+
+    lock(panel: NotebookPanel){
+		alert('Any changes on the cells above will not be updated in this instance.')
     }
 
 }
