@@ -4,6 +4,11 @@
     width: 100%;
 }
 
+.locked-cell {
+    background: gray !important;
+    opacity: 0.5 !important;
+}
+
 .sideview {
     width: 20% !important;
     height: 100% !important;

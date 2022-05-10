@@ -83,6 +83,14 @@ function newOnMetadataChanged (cell: CodeCell){
 
 			})
 			break;
+		case 'lock':
+			console.log(args.newValue);
+			if (args.newValue as boolean){
+				cell.addClass('locked-cell');
+			}else{
+
+			}
+			break;
 		default:
 			break;
 		}
@@ -325,8 +333,14 @@ export class BranchButtonExtension
     }
 
     turnOnBranchMode(panel: NotebookPanel){
-      var script = `%load_ext jupyter_spaces`;
-      panel.context.sessionContext.session?.kernel?.requestExecute({code: script}, true);
+		console.log('turn on branch mode');
+        // replace all cell onmetadatachange
+        for (var c of panel.content.widgets){
+			c.model.metadata.changed.connect(newOnMetadataChanged(c as CodeCell));
+			}
+
+		var script = `%load_ext jupyter_spaces`;
+		panel.context.sessionContext.session?.kernel?.requestExecute({code: script}, true);
     }
 
     processCode(cell: CodeCell, namespaceID: string): string{
@@ -471,7 +485,12 @@ export class BranchButtonExtension
     }
 
     lock(panel: NotebookPanel){
-		alert('Any changes on the cells above will not be updated in this instance.')
+		alert('Any changes on the cells above will not be updated in this instance.');
+		var activeCellIndex = panel.content.activeCellIndex;
+
+		for (var c of panel.content.widgets.slice(0, activeCellIndex)){
+			c.model.metadata.set('lock', true);
+		}
     }
 
 }
