@@ -18,15 +18,16 @@ import {
 	OutputArea,
 } from '@jupyterlab/outputarea';
 import { MyOutputArea } from './outputarea';
-import {
-  	YCodeCell
-} from '@jupyterlab/shared-models';
+import * as models from '@jupyterlab/shared-models';
 
 import {
   	JSONObject,
 } from '@lumino/coreutils';
 
-import { IObservableJSON, IObservableMap } from '@jupyterlab/observables';
+import { 
+	IObservableJSON, 
+	IObservableMap, 
+ } from '@jupyterlab/observables';
 import {
     ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
@@ -39,6 +40,7 @@ import {
 	standardRendererFactories as initialFactories,
 	RenderMimeRegistry
 } from '@jupyterlab/rendermime';
+
 
 const CELL_OUTPUT_AREA_CLASS = 'jp-Cell-outputArea';
 
@@ -87,6 +89,8 @@ function newOnMetadataChanged (cell: CodeCell){
 			console.log(args.newValue);
 			if (args.newValue as boolean){
 				cell.addClass('locked-cell');
+				var newmodel = cell.model.sharedModel.clone();
+				cell.model.switchSharedModel(newmodel, false);
 			}else{
 
 			}
@@ -290,7 +294,7 @@ export class BranchButtonExtension
         // copy paste a cell
         var activeCell = panel.content.activeCell;
         var activeYCell = panel.model!.sharedModel.cells[activeCellIndex];
-        var newYCell = YCodeCell.create();
+        var newYCell = models.YCodeCell.create();
         panel.model?.sharedModel.insertCell(activeCellIndex+1, newYCell);
         newYCell.setSource(activeYCell.getSource());
         var newCell = panel.content.widgets[activeCellIndex+1];
